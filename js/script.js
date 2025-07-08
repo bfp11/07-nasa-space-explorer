@@ -1,150 +1,125 @@
-// NASA API Key
-const API_KEY = "https://api.nasa.gov/planetary/apod?api_key=rAGUypynj5JX65mKqa4VOcwZcrq9dvv5saWpwZl9Y";
-const API_URL = "https://api.nasa.gov/planetary/apod";
+const startInput = document.getElementById('startDate');
+const endInput = document.getElementById('endDate');
+// Call the setupDateInputs function from dateRange.js
+// This sets up the date pickers to:
+// - Default to a range of 9 days (from 9 days ago to today)
+// - Restrict dates to NASA's image archive (starting from 1995)
+setupDateInputs(startInput, endInput);
+// Constants
+const API_KEY = 'CvlSCoVc5k8seRB3NjzPu9RaDcrm4x9D1Vw8OTZR';
+const gallery = document.getElementById('gallery');
+const button = document.querySelector('button');
 
-// DOM Elements
-const startDateInput = document.getElementById("startDate");
-const endDateInput = document.getElementById("endDate");
-const button = document.querySelector("button");
-const gallery = document.getElementById("gallery");
-
-// Add a random space fact on load
-const spaceFacts = [
-  "Venus rotates in the opposite direction to most planets.",
-  "One day on Venus is longer than its year.",
+// Add random space facts
+const facts = [
+  "Venus is the hottest planet in our solar system.",
+  "A day on Venus is longer than its year!",
   "Neutron stars can spin 600 times per second.",
-  "There are more trees on Earth than stars in the Milky Way.",
-  "Jupiter’s Great Red Spot is shrinking.",
-  "Saturn could float in water due to its low density.",
-  "A spoonful of a neutron star would weigh about a billion tons.",
+  "The largest volcano in the solar system is on Mars.",
+  "Saturn's rings are made mostly of ice particles.",
+  "The Sun accounts for 99.86% of the mass in our solar system.",
+  "Jupiter has 95 known moons.",
+  "NASA’s Voyager 1 is the farthest man-made object from Earth.",
+  "Black holes can warp space and time.",
+  "Space is completely silent—there’s no air for sound to travel."
 ];
-function showRandomFact() {
-  const fact = spaceFacts[Math.floor(Math.random() * spaceFacts.length)];
-  const factDiv = document.createElement("div");
-  factDiv.style.textAlign = "center";
-  factDiv.style.margin = "20px";
-  factDiv.innerHTML = `<strong>🌌 Did You Know?</strong> ${fact}`;
-  gallery.insertAdjacentElement("beforebegin", factDiv);
-}
-showRandomFact();
 
-// Add hover zoom CSS effect
-const style = document.createElement("style");
-style.textContent = `
-  .gallery-item img:hover {
-    transform: scale(1.05);
-    transition: transform 0.3s ease-in-out;
-  }
+// Inject a random fact
+const factDiv = document.createElement('div');
+factDiv.className = 'space-fact';
+factDiv.textContent = "🪐 Did You Know? " + facts[Math.floor(Math.random() * facts.length)];
+document.querySelector('.container').insertBefore(factDiv, gallery);
+
+// Add modal structure
+const modal = document.createElement('div');
+modal.id = 'modal';
+modal.className = 'modal hidden';
+modal.innerHTML = `
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="modal-body"></div>
+  </div>
 `;
-document.head.appendChild(style);
+document.body.appendChild(modal);
 
-// Event listener for button
-button.addEventListener("click", async () => {
-  const startDate = startDateInput.value;
-  const endDate = endDateInput.value;
+// Modal close logic
+document.querySelector('.close').onclick = () => modal.classList.add('hidden');
+window.onclick = e => { if (e.target == modal) modal.classList.add('hidden'); };
+
+// Fetch button logic
+button.addEventListener('click', async () => {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
 
   if (!startDate || !endDate) {
     alert("Please select both start and end dates.");
     return;
   }
 
-  gallery.innerHTML = `<p style="text-align:center;">🔄 Loading space photos...</p>`;
+  gallery.innerHTML = `<p class="loading">🔄 Loading space photos…</p>`;
 
   try {
-    const response = await fetch(
-      `${API_URL}?api_key=${API_KEY}&start_date=${startDate}&end_date=${endDate}`
-    );
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error("Unexpected API response");
-    }
-
-    displayGallery(data.reverse()); // reverse for most recent first
+    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&start_date=${startDate}&end_date=${endDate}`);
+    const data = await res.json();
+    renderGallery(data.reverse()); // Reverse so newest is first
   } catch (error) {
-    gallery.innerHTML = `<p style="color:red; text-align:center;">Error fetching data: ${error.message}</p>`;
+    gallery.innerHTML = `<p>Error fetching data. Try again later.</p>`;
+    console.error("Fetch error:", error);
   }
 });
 
-function displayGallery(items) {
-  gallery.innerHTML = ""; // clear gallery
+function renderGallery(items) {
+  gallery.innerHTML = '';
 
-  items.forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "gallery-item";
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'gallery-item hover-zoom';
 
     if (item.media_type === "image") {
       card.innerHTML = `
         <img src="${item.url}" alt="${item.title}" />
         <p><strong>${item.title}</strong><br>${item.date}</p>
       `;
-      card.addEventListener("click", () => showModal(item));
     } else if (item.media_type === "video") {
       card.innerHTML = `
-        <div style="height:200px; background:#000; display:flex; align-items:center; justify-content:center; color:#fff; text-align:center;">
-          <p>🎥 Video Content<br><a href="${item.url}" target="_blank" style="color:lightblue;">Watch Video</a></p>
+        <div class="video-thumb">
+          <a href="${item.url}" target="_blank">
+            <img src="https://img.youtube.com/vi/${extractYouTubeID(item.url)}/hqdefault.jpg" alt="Video thumbnail" />
+            <div class="play-overlay">▶️</div>
+          </a>
         </div>
         <p><strong>${item.title}</strong><br>${item.date}</p>
       `;
-      card.addEventListener("click", () => showModal(item));
     }
 
+    card.addEventListener('click', () => openModal(item));
     gallery.appendChild(card);
   });
 }
 
-function showModal(item) {
-  const modal = document.createElement("div");
-  modal.style.position = "fixed";
-  modal.style.top = 0;
-  modal.style.left = 0;
-  modal.style.width = "100%";
-  modal.style.height = "100%";
-  modal.style.background = "rgba(0, 0, 0, 0.8)";
-  modal.style.display = "flex";
-  modal.style.justifyContent = "center";
-  modal.style.alignItems = "center";
-  modal.style.zIndex = 1000;
-
-  const content = document.createElement("div");
-  content.style.background = "#fff";
-  content.style.borderRadius = "8px";
-  content.style.maxWidth = "800px";
-  content.style.maxHeight = "90vh";
-  content.style.overflowY = "auto";
-  content.style.padding = "20px";
-  content.style.position = "relative";
-
-  const closeBtn = document.createElement("span");
-  closeBtn.textContent = "✖";
-  closeBtn.style.position = "absolute";
-  closeBtn.style.top = "10px";
-  closeBtn.style.right = "15px";
-  closeBtn.style.cursor = "pointer";
-  closeBtn.style.fontSize = "18px";
-
-  closeBtn.onclick = () => modal.remove();
-
-  content.appendChild(closeBtn);
-
+function openModal(item) {
+  let content;
   if (item.media_type === "image") {
-    content.innerHTML += `
-      <img src="${item.hdurl || item.url}" alt="${item.title}" style="width:100%; max-height:500px; object-fit:contain; border-radius: 4px;" />
+    content = `
+      <img src="${item.url}" alt="${item.title}" />
+      <h2>${item.title}</h2>
+      <p><strong>${item.date}</strong></p>
+      <p>${item.explanation}</p>
     `;
-  } else {
-    content.innerHTML += `
-      <div style="width:100%; height:400px;">
-        <iframe src="${item.url}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
-      </div>
+  } else if (item.media_type === "video") {
+    content = `
+      <iframe width="100%" height="400" src="${item.url}" frameborder="0" allowfullscreen></iframe>
+      <h2>${item.title}</h2>
+      <p><strong>${item.date}</strong></p>
+      <p>${item.explanation}</p>
     `;
   }
 
-  content.innerHTML += `
-    <h2>${item.title}</h2>
-    <p><strong>${item.date}</strong></p>
-    <p>${item.explanation}</p>
-  `;
+  document.getElementById('modal-body').innerHTML = content;
+  modal.classList.remove('hidden');
+}
 
-  modal.appendChild(content);
-  document.body.appendChild(modal);
+function extractYouTubeID(url) {
+  const match = url.match(/(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/);
+  return match ? match[1] : "default";
 }

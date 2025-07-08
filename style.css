@@ -142,3 +142,81 @@ button:hover {
   font-size: 48px;
   margin-bottom: 20px;
 }
+
+/* Modal styles */
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 100;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.8);
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-content img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.modal-content iframe {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  font-size: 28px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Random fact section */
+.space-fact {
+  background-color: #fff;
+  color: #212121;
+  padding: 15px 20px;
+  font-size: 16px;
+  border-left: 6px solid #005288;
+  margin: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Hover zoom effect */
+.hover-zoom img {
+  transition: transform 0.3s ease;
+}
+.hover-zoom:hover img {
+  transform: scale(1.05);
+}
+
+/* Video thumbnail overlay */
+.video-thumb {
+  position: relative;
+}
+.play-overlay {
+  position: absolute;
+  top: 40%;
+  left: 40%;
+  font-size: 36px;
+  color: white;
+  text-shadow: 0 0 10px black;
+}
