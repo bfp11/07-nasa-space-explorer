@@ -195,9 +195,12 @@ button:hover {
   padding: 15px 20px;
   font-size: 16px;
   border-left: 6px solid #005288;
-  margin: 20px;
+  margin: 20px auto;         /* Center horizontally */
   border-radius: 6px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  max-width: 800px;
+  width: fit-content;        /* Shrinks to text width */
+  text-align: center;
 }
 
 /* Hover zoom effect */
