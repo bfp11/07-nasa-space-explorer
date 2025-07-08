@@ -1,9 +1,6 @@
 const startInput = document.getElementById('startDate');
 const endInput = document.getElementById('endDate');
-// Call the setupDateInputs function from dateRange.js
-// This sets up the date pickers to:
-// - Default to a range of 9 days (from 9 days ago to today)
-// - Restrict dates to NASA's image archive (starting from 1995)
+
 setupDateInputs(startInput, endInput);
 // Constants
 const API_KEY = 'CvlSCoVc5k8seRB3NjzPu9RaDcrm4x9D1Vw8OTZR';
